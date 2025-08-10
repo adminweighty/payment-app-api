@@ -9,9 +9,7 @@ use App\Models\Payment;
 use App\Models\IveriCredential;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
