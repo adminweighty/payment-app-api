@@ -124,5 +124,6 @@ return [
     ],
 
     'payment_endpoint' => env('PAYMENT_ENDPOINT', 'https://payments.impeccablesolutionszw.com'),
+    'payment_email' => env('PAYMENT_EMAIL', 'info@impeccablesolutionszw.com'),
 
 ];
