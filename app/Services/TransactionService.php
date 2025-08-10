@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\PaymentRequestDTO;
 use App\Models\Event;
 use App\Models\IveriResult;
 use App\Models\Payment;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class TransactionService
 {
@@ -35,7 +37,7 @@ class TransactionService
             $ivObject->result_description = $params['ResultDescription'] ?? null;
             $ivObject->application_id = $params['ApplicationID'] ?? null;
             $ivObject->merchant_reference = $params['MerchantReference'] ?? null;
-            $ivObject->amount = isset($params['Amount']) ? (float) $params['Amount'] : null;
+            $ivObject->amount = isset($params['Amount']) ? (float)$params['Amount'] : null;
             $ivObject->currency = $params['Currency'] ?? null;
             $ivObject->jwt = $params['JWT'] ?? null;
             $ivObject->pan = $params['PAN'] ?? null;
@@ -61,7 +63,7 @@ class TransactionService
             if ($ivObject->result_code == '0' && $transactions && empty($authenticationFailed)) {
                 $iveriCred = IveriCredential::first();
 
-                $resultAmount = (int) $ivObject->amount;
+                $resultAmount = (int)$ivObject->amount;
                 $requestBody = [
                     'Version' => '2.0',
                     'CertificateID' => '{' . $iveriCred->iveri_certificate_id . '}',
@@ -127,24 +129,68 @@ class TransactionService
                 // Generate tickets
                 $tickets = [];
                 for ($i = 0; $i < $transactions->payer_number_of_tickets; $i++) {
-                    $ticketNumber = $event->special_code.'-'.$transactions->id.'-'.strtoupper(Str::random(6));
+                    $ticketNumber = $event->special_code . '-' . $transactions->id . '-' . strtoupper(Str::random(6));
                     $ticket = Ticket::create([
                         'payment_id' => $transactions->id,
-                        'ticket_number'  => $ticketNumber,
+                        'ticket_number' => $ticketNumber,
                     ]);
                     $tickets[] = $ticketNumber;
                 }
 // Send confirmation email
                 Mail::to($transactions->payer_email)
-                    ->cc(['cc1@example.com'])
-                    ->send(new \App\Mail\TicketConfirmation($tickets, $transactions,$event));
-                $redirectUrl = config('app.payment_endpoint') . 'success?ticketReferences='.$transactions->merchant_reference;
+                    ->send(new \App\Mail\TicketConfirmation($tickets, $transactions, $event));
+                $redirectUrl = config('app.payment_endpoint') . 'success?ticketReferences=' . $transactions->merchant_reference;
             } else {
-                $redirectUrl = config('app.payment_endpoint') . '/failed?ticketReferences='.$transactions->merchant_reference;
+                $redirectUrl = config('app.payment_endpoint') . '/failed?ticketReferences=' . $transactions->merchant_reference;
             }
         }
 
         return $redirectUrl;
+    }
+
+    public function createPayment(array $data)
+    {
+        $dto = new PaymentRequestDTO($data);
+        $guid = (string)Str::uuid();
+        $payment = Payment::create([
+            'payment_method_name' => $dto->methodName,
+            'payment_special_code' => $dto->eventId,
+            'payment_amount' => $dto->amount,
+            'payer_number_of_tickets' => $dto->quantity,
+            'payer_names' => $dto->names,
+            'payer_email' => $dto->email,
+            'payer_mobile' => $dto->mobileNumber,
+            'status' => false,
+            'payment_currency' => 'USD',
+            'payer_paid_status' => 0,
+            'merchant_reference' => $guid ?? null,
+            'payment_status' => '',
+            'payment_status_one' => '',
+            'payment_status_two' => ''
+        ]);
+
+        //create iveri record
+        $ivObjectResult = IveriResult::where('merchant_reference',$payment->merchant_reference)->first();
+
+        if ($ivObjectResult) {
+            // Update existing record
+            $ivObjectResult->encrypted_pan = $dto->cardNumber;
+            $ivObjectResult->save();
+        } else {
+            // Create new record
+            IveriResult::create([
+                'encrypted_pan'     => $dto->cardNumber,
+                'merchant_reference' => $payment->merchant_reference
+            ]);
+        }
+        $iveriCred = IveriCredential::first();
+
+        // Send back the response directly from the service
+        return response()->json([
+            'status' => 'success',
+            'applicationID' => $iveriCred->iveri_application_id,
+            'merchantReference' => $payment->merchant_reference,
+        ], 200);
     }
 
     function decodeQueryString(string $query): array

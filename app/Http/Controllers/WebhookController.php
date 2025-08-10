@@ -43,4 +43,17 @@ class WebhookController extends Controller
 
         return redirect()->away($redirectUrl);
     }
+
+    public function handlePaymentWebhook(Request $request)
+    {
+        $token = $request->header('X-Webhook-Secret');
+
+        if ($token !== env('PAYMENT_WEBHOOK_SECRET')) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        // Payment gateway sends JSON — capture it
+        $payload = $request->all();
+
+        return $this->transactionService->createPayment($payload);
+    }
 }

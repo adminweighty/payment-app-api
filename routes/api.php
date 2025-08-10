@@ -8,3 +8,5 @@ return response()->json(['status' => 'API is working']);
 });
 
 Route::post('/ticket-call-back', [WebhookController::class, 'sendWebhookVeri']);
+
+Route::post('/ticket/payment', [WebHookController::class, 'handlePaymentWebhook']);
