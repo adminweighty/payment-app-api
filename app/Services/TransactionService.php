@@ -137,7 +137,7 @@ class TransactionService
 // Send confirmation email
                 Mail::to($transactions->payer_email)
                     ->send(new \App\Mail\TicketConfirmation($tickets, $transactions, $event));
-                $redirectUrl = config('app.payment_endpoint') . 'success?ticketReferences=' . $transactions->merchant_reference;
+                $redirectUrl = config('app.payment_endpoint') . '/success?ticketReferences=' . $transactions->merchant_reference;
             } else {
                 $redirectUrl = config('app.payment_endpoint') . '/failed?ticketReferences=' . $transactions->merchant_reference;
             }

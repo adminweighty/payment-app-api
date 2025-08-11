@@ -17,7 +17,11 @@ return new class extends Migration
             $table->date('date');
             $table->string('time');
             $table->string('venue');
-            $table->decimal('price', 8, 2);
+            $table->decimal('early_bird_ticket', 8, 2);
+            $table->decimal('advance_ticket', 8, 2);
+            $table->decimal('gate_ticket', 8, 2);
+            $table->decimal('vip_ticket', 8, 2);
+            $table->decimal('vvip_ticket', 8, 2);
             $table->string('special_code')->unique()->nullable(); // special code, unique and optional
             $table->string('event_image_url')->unique()->nullable();
             $table->timestamps();

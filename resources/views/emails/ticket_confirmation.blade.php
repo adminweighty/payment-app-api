@@ -4,6 +4,8 @@
 
 <h1>Thank you for your purchase, {{ $transaction->payer_names }}</h1>
 
+<p>Total:${{ $transaction->payment_amount }}</p>
+
 <p>Your tickets are confirmed. Here are your ticket numbers:</p>
 
 <ul>
