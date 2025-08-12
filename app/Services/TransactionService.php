@@ -8,6 +8,7 @@ use App\Models\IveriResult;
 use App\Models\Payment;
 use App\Models\IveriCredential;
 use App\Models\Ticket;
+use App\Utils\CryptoUtil;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
@@ -25,7 +26,7 @@ class TransactionService
         $ivObjectResult = IveriResult::where('merchant_reference', $params['MerchantReference'] ?? null)->get();
 
         if ($ivObjectResult->isNotEmpty()) {
-            $encryptedPan = Crypt::decryptString($ivObjectResult[0]->enrypted_pan);
+            $encryptedPan = CryptoUtil::decrypt($ivObjectResult[0]->enrypted_pan);
 
             $ivObject = $ivObjectResult[0];
             $ivObject->three_d_secure_request_id = $params['ThreeDSecure_RequestID'] ?? null;
