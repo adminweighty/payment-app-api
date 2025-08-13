@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\DTOs\ZeePayRequest;
+use App\Http\Requests\ZeePayRequest;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
