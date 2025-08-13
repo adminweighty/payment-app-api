@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO;
+namespace App\Http\Requests;
 
 class PaymentRequestDTO
 {

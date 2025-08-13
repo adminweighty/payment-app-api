@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\DTO\PaymentRequestDTO;
+use App\Http\Requests\PaymentRequestDTO;
 use App\Models\Event;
 use App\Models\IveriResult;
 use App\Models\Payment;
@@ -10,7 +10,6 @@ use App\Models\IveriCredential;
 use App\Models\Ticket;
 use App\Utils\CryptoUtil;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
