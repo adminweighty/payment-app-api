@@ -22,10 +22,11 @@ class TransactionService
         $encryptedPan = '';
         $authenticationFailed = '';
 
+
         $ivObjectResult = IveriResult::where('merchant_reference', $params['MerchantReference'] ?? null)->get();
 
         if ($ivObjectResult->isNotEmpty()) {
-            $encryptedPan = CryptoUtil::decrypt($ivObjectResult[0]->enrypted_pan);
+            $encryptedPan = CryptoUtil::decrypt($ivObjectResult[0]->encrypted_pan);
 
             $ivObject = $ivObjectResult[0];
             $ivObject->three_d_secure_request_id = $params['ThreeDSecure_RequestID'] ?? null;
@@ -46,12 +47,11 @@ class TransactionService
             $ivObject->three_d_secure_ds_trans_id = $params['ThreeDSecure_DSTransID'] ?? null;
             $ivObject->card_holder_authentication_id = $params['CardHolderAuthenticationID'] ?? null;
             $ivObject->card_holder_authentication_data = $params['CardHolderAuthenticationData'] ?? null;
-            $ivObject->enrypted_pan = '';
+            $ivObject->encrypted_pan = '';
 
             $ivObject->save();
 
             $transactions = Payment::where('merchant_reference', $ivObject->merchant_reference)
-                ->whereNull('wallet_name')
                 ->first();
 
             if (empty($ivObject->card_holder_authentication_data)) {
@@ -107,7 +107,7 @@ class TransactionService
                     $transactions->save();
                 } else {
                     $transactions->status = true;
-                    $transactions->transaction_paid = -1;
+                    $transactions->payer_paid_status = -1;
                     $transactions->payment_status = 'Failed';
                     $transactions->payment_status_one = $ivObject->result_code;
                     $transactions->payment_status_two = $resultDescription;
@@ -115,7 +115,7 @@ class TransactionService
                 }
             } else {
                 $transactions->status = true;
-                $transactions->transaction_paid = -1;
+                $transactions->payer_paid_status = -1;
                 $transactions->payment_status = 'Failed';
                 $transactions->payment_status_one = $authenticationFailed ?: $ivObject->result_code;
                 $transactions->payment_status_two = $authenticationFailed ?: $ivObject->result_description;
