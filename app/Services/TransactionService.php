@@ -123,7 +123,7 @@ class TransactionService
                 $transactions->save();
             }
 
-            if ($transactions->status) {
+            if ($transactions->payer_paid_status==1) {
                 $event = Event::findOrFail($transactions->payment_special_code);
                 // Generate tickets
                 $tickets = [];
