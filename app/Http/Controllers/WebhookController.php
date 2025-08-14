@@ -34,8 +34,14 @@ class WebhookController extends Controller
 
         $redirectUrl = $this->transactionService->saveIveriRequest($zeePayRequest);
 
+        if (empty($redirectUrl)) {
+            return response()->json([
+                'message' => 'Failed to process request',
+                'status'  => 'Failed'
+            ], Response::HTTP_BAD_REQUEST);
+        }
 
-        return $redirectUrl;
+        return redirect()->away($redirectUrl->redirectUrl);
     }
 
     public function handlePaymentWebhook(Request $request)
