@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/status', function () {
@@ -26,7 +27,9 @@ Route::get('/test-email', function () {
     }
 });
 
-Route::post('/ticket-call-back', [WebhookController::class, 'sendWebhookVeri']);
+Route::any('/ticket-call-back', [WebhookController::class, 'sendWebhookVeri'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
 Route::post('/ticket/payment', [WebHookController::class, 'handlePaymentWebhook']);
 Route::get('/events/{identifier}', [EventController::class, 'show']);
 
