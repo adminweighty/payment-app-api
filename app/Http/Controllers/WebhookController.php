@@ -41,7 +41,7 @@ class WebhookController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        return redirect()->away($redirectUrl->redirectUrl);
+        return redirect()->away($redirectUrl);
     }
 
     public function handlePaymentWebhook(Request $request)

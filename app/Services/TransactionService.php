@@ -139,20 +139,13 @@ class TransactionService
                 Mail::to($transactions->payer_email)
                     ->send(new \App\Mail\TicketConfirmation($tickets, $transactions, $event));
                 $redirectUrl = config('app.payment_endpoint') . '/success?ticketReferences=' . $transactions->merchant_reference;
-                $status="success";
-                $ticket="$transactions->merchant_reference";
             } else {
-                $status="failed";
-                $redirectUrl = config('app.payment_endpoint') . '/failed?ticketReferences=' . $transactions->merchant_reference;
-                $ticket='';
+                 $redirectUrl = config('app.payment_endpoint') . '/failed?ticketReferences=' . $transactions->merchant_reference;
             }
         }
 
-        return response()->json([
-            'status' => $status,
-            'redirectUrl' => $redirectUrl,
-            'ticket'=>$ticket
-        ]);
+        return  $redirectUrl;
+
     }
 
     public function createPayment(array $data)
